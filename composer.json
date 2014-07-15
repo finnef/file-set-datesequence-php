@@ -1,0 +1,29 @@
+{
+  "name": "umnlib/file-set-datesequence",
+  "description": "A PHP package for sets of files whose names are a sequence of dates.",
+  "keywords": [],
+  "authors": [
+    {
+      "name": "David Naughton",
+      "email": "naughton@umn.edu"
+    }
+  ],
+
+  "require": {
+  },
+
+  "repositories": [
+  ],   
+
+  "require-dev": {
+    "phpunit/phpunit": ">=3.7"
+  },
+
+  "autoload": {
+    "psr-4": {"UmnLib\\Core\\File\\Set\\": "src/"}
+  },
+
+  "autoload-dev": {
+    "psr-4": {"UmnLib\\Core\\Tests\\File\\Set\\": "tests/"}
+  }
+}

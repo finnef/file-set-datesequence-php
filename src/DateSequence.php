@@ -2,16 +2,15 @@
 
 namespace UmnLib\Core\File\Set;
 
-require_once 'Set.php';
-require_once 'File/Find/Rule.php';
+use Symfony\Component\Finder\Finder;
 
-class DateSequence extends Set
+class DateSequence extends \UmnLib\Core\Set
 {
     protected $directory; // A directory that contains all the files in the set.
     protected $separator = '-'; // Separates the date parts.
     protected $suffix; // A file name suffix.
     // Maybe TODO: Add an optional prefix?
-    protected $date_format = 'Y-m-d-H-i-s'; // For the PHP date() function.
+    protected $dateFormat = 'Y-m-d-H-i-s'; // For the PHP date() function.
     protected $regex; // Based on all the other attributes, this becomes a predicate that members must satisfy.
     
     function __construct(array $params = array())
@@ -19,8 +18,8 @@ class DateSequence extends Set
         // TODO: Add a locking mechanism for the directory.
         if (array_key_exists('directory', $params)) {
             $directory = $params['directory'];
-            if (!is_dir( $directory )) {
-                throw new Exception("Directory '$directory' does not exist");
+            if (!is_dir($directory)) {
+                throw new \InvalidArgumentException("Directory '$directory' does not exist");
             }
             $this->directory = $directory;
         } else {
@@ -29,8 +28,8 @@ class DateSequence extends Set
 
         if (array_key_exists('separator', $params)) {
             $separator = $params['separator'];
-            if (!is_scalar( $separator )) {
-                throw new Exception("Param 'separator' must be a scalar");
+            if (!is_scalar($separator)) {
+                throw new \InvalidArgumentException("Param 'separator' must be a scalar");
             }
             $this->separator = $separator;
         }
@@ -38,30 +37,32 @@ class DateSequence extends Set
         if (array_key_exists('suffix', $params)) {
             $suffix = $params['suffix'];
             if (!is_scalar($suffix)) {
-                throw new Exception("Param 'suffix' must be a scalar");
+                throw new \InvalidArgumentException("Param 'suffix' must be a scalar");
             }
             $this->suffix = $suffix;
         }
 
-        $this->regex = $this->generate_regex(
+        $this->regex = $this->generateRegex(
             $this->separator,
             $this->suffix
         );
 
-        $f = new File_Find_Rule();
-        $file_names = $f->name( $this->regex )->in( $this->directory );
+        //$f = new File_Find_Rule();
+        //$filenames = $f->name( $this->regex )->in( $this->directory );
+        $finder = new Finder();
+        $files = $finder->name($this->regex)->in($this->directory);
         parent::__construct();
-        foreach ($file_names as $file_name) {
+        foreach ($files as $file) {
             // This is fragile! Only works to add files this way
             // in the constructor, because we're adding files that
             // already exist.
-            parent::add( $file_name );
+            parent::add($file->getFilename());
         }
     }
 
-    protected function generate_regex($separator, $suffix)
+    protected function generateRegex($separator, $suffix)
     {
-        $date_parts = array(
+        $dateParts = array(
             '/^\d{4}', // year
             '\d{2}', // month (01-12)
             '\d{2}', // day (01-31)
@@ -69,10 +70,10 @@ class DateSequence extends Set
             '\d{2}', // minutes (00-59)
             '\d{2}', // seconds (00-59)
         );
-        $regex = join($date_parts, $separator);
+        $regex = join($dateParts, $separator);
         if ($suffix) {
-            $suffix_regex = quotemeta( $suffix );
-            $regex .= $suffix_regex;
+            $suffixRegex = quotemeta($suffix);
+            $regex .= $suffixRegex;
         }
         $regex .= '$/';
         return $regex;
@@ -82,65 +83,65 @@ class DateSequence extends Set
     {
         $args = func_get_args();
         if (array_key_exists('0', $args)) {
-            $file_name = $args[0];
-            if (file_exists($file_name)) {
-                throw new Exception("File '$file_name' already exists");
+            $filename = $args[0];
+            if (file_exists($filename)) {
+                throw new \InvalidArgumentException("File '$filename' already exists");
             }
-            $basename = basename( $file_name );
+            $basename = basename($filename);
             if (!preg_match($this->regex, $basename)) {
-                throw new Exception(
-                    "File '$file_name' fails to satisfy predicate " . $this->regex
+                throw new \InvalidArgumentException(
+                    "File '$filename' fails to satisfy predicate " . $this->regex
                 );
             }
-            $dirname = dirname( $file_name );
+            $dirname = dirname($filename);
             if ($dirname == '.') {
-                $file_name = $this->directory . '/' . $file_name;
+                $filename = $this->directory . '/' . $filename;
             } else if ($dirname != $this->directory) {
-                throw new Exception("Invalid directory '$dirname'");
+                throw new \InvalidArgumentException("\Invalid directory '$dirname'");
             }
         } else {
-            unset($file_name);
+            unset($filename);
             foreach (range(0,60) as $i) {
-                $file_name = $this->directory . '/' . date( $this->date_format );
+                $filename = $this->directory . '/' . date($this->dateFormat);
                 if ($this->suffix) {
-                    $file_name .= $this->suffix;
+                    $filename .= $this->suffix;
                 }
-                if (file_exists( $file_name )) {
-                    unset($file_name);
+                if (file_exists($filename)) {
+                    unset($filename);
                     sleep(1);
                     continue;
                 } else {
                     break;
                 }
             }
-            if (!$file_name) {
-                throw new Exception("Possible race condition: cannot create unique file name");
+            if (!$filename) {
+                throw new \RuntimeException("Possible race condition: cannot create unique file name");
             }
         }
-        touch( $file_name );
-        parent::add( $file_name );
-        return $file_name;
+        touch($filename);
+        parent::add($filename);
+        return $filename;
     }
 
-    public function delete( $file_name )
+    public function delete($filename)
     {
-        if (!file_exists($file_name)) {
-            throw new Exception("File '$file_name' does not exist");
+        if (!file_exists($filename)) {
+            throw new \InvalidArgumentException("File '$filename' does not exist");
         }
-        unlink( $file_name );
-        parent::delete( $file_name );
+        unlink($filename);
+        parent::delete($filename);
     }
 
 /* Don't think I need this, but keeping it here for now...
-    protected function sort($file_names) {
+    protected function sort($filenames) {
         // natcasesort preserves keys. We need to break that:
-        natcasesort( $file_names );
-        $sorted_file_names = array();
-        foreach ($file_names as $file_name) {
-            $sorted_file_names[] = $file_name;
+        natcasesort($filenames);
+        $sortedFileNames = array();
+        foreach ($filenames as $filename) {
+            $sortedFileNames[] = $filename;
         }
-        return $sorted_file_names;
+        return $sortedFileNames;
     }
 */
     
-} // end class File_Set_DateSequence
+}

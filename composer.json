@@ -10,9 +10,15 @@
   ],
 
   "require": {
+    "umnlib/set": ">=1.0.0",
+    "symfony/finder": "v2.5.2"
   },
 
   "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.umn.edu:Libraries/set-php.git"
+    }
   ],   
 
   "require-dev": {

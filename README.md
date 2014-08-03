@@ -8,7 +8,7 @@ Install via [Composer](http://getcomposer.org). In your project's `composer.json
 
 ```json
   "require": {
-    "umnlib/file-set-datesequence": ">=1.0.0"
+    "umnlib/file-set-datesequence": "1.0.*"
   },
   "repositories": [
     {

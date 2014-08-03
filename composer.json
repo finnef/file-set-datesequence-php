@@ -10,7 +10,7 @@
   ],
 
   "require": {
-    "umnlib/set": ">=1.0.0",
+    "umnlib/set": "1.0.*",
     "symfony/finder": "v2.5.2"
   },
 

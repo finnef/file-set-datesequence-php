@@ -13,7 +13,7 @@ Install via [Composer](http://getcomposer.org). In your project's `composer.json
   "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.umn.edu:Libraries/file-set-datesequence-php.git"
+      "url": "git@github.com:UMNLibraries/file-set-datesequence-php.git"
     }
   ]
 ```
@@ -22,3 +22,6 @@ Install via [Composer](http://getcomposer.org). In your project's `composer.json
 
 For older versions of this package that did not use Composer, see the `0.x.y` releases.
 
+## Attribution
+
+The University of Minnesota Libraries created this software for the [EthicShare](http://www.ethicshare.org/about) project.

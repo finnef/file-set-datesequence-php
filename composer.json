@@ -17,7 +17,7 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.umn.edu:Libraries/set-php.git"
+      "url": "git@github.com:UMNLibraries/set-php.git"
     }
   ],   
 

@@ -11,7 +11,7 @@
 
   "require": {
     "umnlib/set": "1.0.*",
-    "symfony/finder": "v2.5.2"
+    "symfony/finder": "^2.5.2"
   },
 
   "repositories": [
